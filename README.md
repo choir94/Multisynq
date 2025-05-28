@@ -5,7 +5,7 @@
 ---
 ## First Join: Connect Phantom Wallet
 
-[Click here to join and connect your Phantom Wallet](https://startsynqing.com/?ref=904dd5-drcp33)
+[Click here to join and connect your new Phantom Wallet](https://startsynqing.com/?ref=904dd5-drcp33)
 
 **Input code:** `drinktheblue`
 
