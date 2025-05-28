@@ -159,7 +159,7 @@ http://<YOUR_VPS_IP>:3000
 
 - Telegram: [https://t.me/airdrop_node](https://t.me/airdrop_node)
 
-## Automatic Installation with Oakai (optional)
+## Automatic Installation (optional)
 
 If you'd like to install the entire process automatically, you can use the following command:
 
