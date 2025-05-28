@@ -154,6 +154,9 @@ http://<YOUR_VPS_IP>:3000
 
 - Telegram: [https://t.me/airdrop_node](https://t.me/airdrop_node)
 
+- Join discord to claim role [https://discord.gg/QTBBCVPw]
+(https://discord.gg/QTBBCVPw)
+
 ## Automatic Installation (optional)
 
 If you'd like to install the entire process automatically, you can use the following command:
