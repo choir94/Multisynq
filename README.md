@@ -98,7 +98,7 @@ export PATH="$(npm config get prefix)/bin:$PATH"
 
 ### Initialize configuration
 ```bash
-synqchronize init  
+synchronize init  
 ```
 > Follow the prompts and input the required account information.
 
@@ -109,24 +109,24 @@ synqchronize init
 
 ### Setup Synqchronize service
 ```bash
-synqchronize service
+synchronize service
 ```
 
 ### Copy the service file to the systemd directory
 ```bash
-sudo cp ~/.synqchronizer/synqchronizer.service /etc/systemd/system/
+sudo cp ~/.synchronizer/synchronizer.service /etc/systemd/system/
 ```
 
 ### Reload systemd and enable the service
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable synqchronizer
-sudo systemctl start synqchronizer
+sudo systemctl enable synchronizer
+sudo systemctl start synchronizer
 ```
 
 ### Verify service status
 ```bash
-sudo systemctl status synqchronizer
+sudo systemctl status synchronizer
 ```
 
 ---
@@ -140,7 +140,7 @@ sudo ufw allow 3000/tcp
 
 ### Run the dashboard (optional)
 ```bash
-synqchronize web
+synchronize web
 ```
 
 Then access:
@@ -154,11 +154,11 @@ http://<YOUR_VPS_IP>:3000
 
 - Check node status:
   ```bash
-  synqchronize status
+  synchronize status
   ```
 - View service logs:
   ```bash
-  sudo journalctl -u synqchronizer -f
+  sudo journalctl -u synchronizer -f
   ```
 
 ---
