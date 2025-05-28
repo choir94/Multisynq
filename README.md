@@ -3,6 +3,10 @@
 > **Note:** This tutorial is intended for **Ubuntu/Debian**-based systems. You don't need to be logged in as root (use `sudo` only when necessary).
 
 ---
+## First Join connect phantom wallet
+https://startsynqing.com/?ref=904dd5-drcp33
+
+input code drinktheblue
 
 ## 1. Install Docker and Docker Compose
 
