@@ -8,12 +8,7 @@ https://startsynqing.com/?ref=904dd5-drcp33
 
 input code drinktheblue
 
-## 1. Install Docker and Docker Compose
-
-### Remove old versions of Docker (if any)
-```bash
-sudo apt-get remove docker docker-engine docker.io containerd runc -y
-```
+## 1. Install Docker
 
 ### Update and install dependencies
 ```bash
