@@ -88,7 +88,7 @@ npm install -g synqchronizer
 
 ### Initialize configuration
 ```bash
-synqchronize init
+synqchronizer init  
 ```
 > Follow the prompts and input the required account information.
 
@@ -98,7 +98,7 @@ synqchronize init
 
 ### Setup Synqchronize service
 ```bash
-synqchronize service
+synqchronizer service
 ```
 
 ### Copy the service file to the systemd directory
