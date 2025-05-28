@@ -96,6 +96,10 @@ synqchronizer init
 
 ## 5. Run Synqchronize as a Systemd Service
 
+```bash
+synqchronizer start
+```
+
 ### Setup Synqchronize service
 ```bash
 synqchronizer service
