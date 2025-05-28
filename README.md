@@ -159,12 +159,3 @@ http://<YOUR_VPS_IP>:3000
 - Join discord to claim role [https://discord.gg/QTBBCVPw]
 (https://discord.gg/QTBBCVPw)
 
-## Automatic Installation (optional)
-
-If you'd like to install the entire process automatically, you can use the following command:
-
-```bash
-wget -O - https://raw.githubusercontent.com/choir94/Airdropguide/refs/heads/main/synqchronize.sh | bash
-```
-
-The command above will download and run the `synqchronize.sh` installer script from the official Airdrop Node repository.
