@@ -3,10 +3,12 @@
 > **Note:** This tutorial is intended for **Ubuntu/Debian**-based systems. You don't need to be logged in as root (use `sudo` only when necessary).
 
 ---
-## First Join connect phantom wallet
-https://startsynqing.com/?ref=904dd5-drcp33
+## First Join: Connect Phantom Wallet
 
-input code drinktheblue
+[Click here to join and connect your Phantom Wallet](https://startsynqing.com/?ref=904dd5-drcp33)
+
+**Input code:** `drinktheblue`
+
 
 ## 1. Install Docker
 
