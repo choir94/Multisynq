@@ -3,7 +3,7 @@ const { SigningStargateClient, GasPrice } = require("@cosmjs/stargate");
 const { MsgExecuteContract } = require("cosmjs-types/cosmwasm/wasm/v1/tx");
 const { toUtf8 } = require("@cosmjs/encoding");
 const { Slip10RawIndex } = require("@cosmjs/crypto");
-const { ethers, JsonRpcProvider, Wallet, keccak256, solidityPacked } = require("ethers");
+const { ethers, JsonRpcProvider, Wallet } = require("ethers");
 const axios = require("axios");
 const moment = require("moment-timezone");
 const fs = require("fs").promises;
@@ -117,7 +117,7 @@ const USDC_ABI = [
 ];
 
 // Template Instruksi Cosmos
-const INSTRUCTION_USDC_0_01 = "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000004200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000340000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000002710000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002e00000000000000000000000000000000000000000000000000000000000002710000000000000000000000000000000000000000000000000000000000000002a{sender}00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b{receiver}000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e62626e317a7372763233616b6b6778646e77756c3732736674677632786a74356b68736e743377776a687030666668363833687a7035617135613068366e00000000000000000000000000000000000000000000000000000000000000000004555344430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045553444300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003f78696f6e3132766b3361386c7a3637646530357a6c7176713530707670643270636a66777674777a74356676647437357a387533327932657168646632397600";
+const INSTRUCTION_USDC_0_01 = "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000004200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000340000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000271000000000000000000000000000000000000000000000000000000000000002600000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002e00000000000000000000000000000000000000000000000000000000000002710000000000000000000000000000000000000000000000000000000000000002a{sender}00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b{receiver}000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e62626e317a7372763233616b6b6778646e77756c3732736674677632786a74356b68736e743377776a687030666668363833687a7035617135613068366e00000000000000000000000000000000000000000000000000000000000000000004555344430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045553444300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003f78696f6e3132766b3361386c7a3637646530357a6c7176713530707670643270636a66777674777a74356676647437357a387533327932657168646632397600";
 
 const INSTRUCTION_USDC_0_02 = "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000004200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000340000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000001a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004e20000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002e00000000000000000000000000000000000000000000000000000000000004e20000000000000000000000000000000000000000000000000000000000000002a{sender}00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002b{receiver}000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e62626e317a7372763233616b6b6778646e77756c3732736674677632786a74356b68736e743377776a687030666668363833687a7035617135613068366e00000000000000000000000000000000000000000000000000000000000000000004555344430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045553444300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003f78696f6e3132766b3361386c7a3637646530357a6c7176713530707670643270636a66777674777a74356676647437357a387533327932657168646632397600";
 
@@ -130,7 +130,7 @@ const WALLET_FILE = path.join(__dirname, "wallet.json");
 
 // Fungsi Utilitas
 function getRandomDelay() {
-  return Math.floor(Math.random() * (120000 - 30000 + 1)) + 30000; // 30-120 detik
+  return Math.floor(Math.random() * (120000 - 30000 + 1)) + 30000; // 30-120 seconds
 }
 
 async function sleep(ms) {
@@ -148,14 +148,14 @@ function getRandomInstruction(mode) {
   let selected;
   if (mode === "1") {
     selected = ubbnInstructions[crypto.randomInt(0, ubbnInstructions.length)];
-    logger.info(`Instruksi Terpilih: ubbn ${selected.includes("3e8") ? "0.001" : "0.002"}`);
+    logger.info(`Selected Instruction: ubbn ${selected.includes("3e8") ? "0.001" : "0.002"}`);
   } else if (mode === "2") {
     selected = usdcInstructions[crypto.randomInt(0, usdcInstructions.length)];
-    logger.info(`Instruksi Terpilih: USDC ${selected.includes("2710") ? "0.01" : "0.02"}`);
+    logger.info(`Selected Instruction: USDC ${selected.includes("2710") ? "0.01" : "0.02"}`);
   } else {
     const allInstructions = [...usdcInstructions, ...ubbnInstructions];
     selected = allInstructions[crypto.randomInt(0, allInstructions.length)];
-    logger.info(`Instruksi Terpilih: ${selected.includes("2710") ? "USDC 0.01" : selected.includes("4e20") ? "USDC 0.02" : selected.includes("3e8") ? "ubbn 0.001" : "ubbn 0.002"}`);
+    logger.info(`Selected Instruction: ${selected.includes("2710") ? "USDC 0.01" : selected.includes("4e20") ? "USDC 0.02" : selected.includes("3e8") ? "ubbn 0.001" : "ubbn 0.002"}`);
   }
   return selected;
 }
@@ -177,23 +177,23 @@ async function readCosmosWallets() {
     const content = await fs.readFile(WALLET_FILE, "utf8");
     const wallets = JSON.parse(content);
     if (!Array.isArray(wallets) || wallets.length === 0) {
-      throw new Error("Tidak ada wallet ditemukan di wallet.json atau format tidak valid");
+      throw new Error("No wallets found in wallet.json or invalid format");
     }
     for (const wallet of wallets) {
       if (!wallet.credential || !wallet.xionAddress) {
-        throw new Error("Setiap wallet harus memiliki kolom 'credential' dan 'xionAddress'");
+        throw new Error("Each wallet must have 'credential' and 'xionAddress' fields");
       }
       if (!wallet.xionAddress.startsWith(XION_TESTNET.prefix) || wallet.xionAddress.length !== 43) {
-        throw new Error(`Alamat Xion tidak valid: ${wallet.xionAddress}. Harus diawali '${XION_TESTNET.prefix}' dan panjang 43 karakter`);
+        throw new Error(`Invalid Xion address: ${wallet.xionAddress}. Must start with '${XION_TESTNET.prefix}' and be 43 characters long`);
       }
       const isMnemonic = wallet.credential.split(" ").length === 12 || wallet.credential.split(" ").length === 24;
       if (!isMnemonic) {
-        throw new Error(`Credential tidak valid: ${wallet.credential}. Harus berupa mnemonic 12/24 kata`);
+        throw new Error(`Invalid credential: ${wallet.credential}. Must be a 12/24 word mnemonic`);
       }
     }
     return wallets;
   } catch (error) {
-    throw new Error(`Gagal membaca wallet.json: ${error.message}`);
+    throw new Error(`Failed to read wallet.json: ${error.message}`);
   }
 }
 
@@ -225,7 +225,7 @@ async function checkCosmosBalance(client, address, denom) {
     const balance = await client.getBalance(address, denom);
     return parseInt(balance.amount);
   } catch (error) {
-    logger.error(`Gagal memeriksa saldo untuk ${address}: ${error.message}`);
+    logger.error(`Failed to check balance for ${address}: ${error.message}`);
     return 0;
   }
 }
@@ -236,21 +236,21 @@ function generateCosmosInstruction(senderAddress, xionAddress, mode) {
   logger.info(`Sender Hex: ${senderHex}`);
   logger.info(`Receiver Hex: ${receiverHex}`);
   if (!isValidHex(senderHex) || !isValidHex(receiverHex)) {
-    throw new Error(`Format hex tidak valid untuk sender (${senderHex}) atau receiver (${receiverHex})`);
+    throw new Error(`Invalid hex format for sender (${senderHex}) or receiver (${receiverHex})`);
   }
   let instructionHex = getRandomInstruction(mode);
   if (!instructionHex || instructionHex.length < 10) {
-    throw new Error("Template instruksi tidak valid atau kosong");
+    throw new Error("Invalid or empty instruction template");
   }
   instructionHex = instructionHex.replace("{sender}", senderHex).replace("{receiver}", receiverHex);
-  logger.info(`Instruksi Hex yang Dihasilkan: ${instructionHex}`);
-  logger.info(`Panjang Instruksi Hex: ${instructionHex.length}`);
+  logger.info(`Generated Instruction Hex: ${instructionHex}`);
+  logger.info(`Instruction Hex Length: ${instructionHex.length}`);
   if (!instructionHex.startsWith("0x") || !isValidHex(instructionHex.slice(2))) {
-    throw new Error(`Format instruksi hex tidak valid: ${instructionHex}`);
+    throw new Error(`Invalid instruction hex format: ${instructionHex}`);
   }
   const expectedLength = instructionHex.includes("455534443") ? 2370 : 2306;
   if (instructionHex.length !== expectedLength) {
-    throw new Error(`Panjang instruksi tidak cocok: diharapkan ${expectedLength}, didapat ${instructionHex.length}`);
+    throw new Error(`Instruction length mismatch: expected ${expectedLength}, got ${instructionHex.length}`);
   }
   return instructionHex;
 }
@@ -261,7 +261,7 @@ async function estimateCosmosGas(client, senderAddress, msg) {
     const gasWithBuffer = Math.ceil(gasEstimation * 1.5);
     return { gasEstimation, gasWithBuffer };
   } catch (error) {
-    throw new Error(`Estimasi gas gagal: ${error.message}`);
+    throw new Error(`Gas estimation failed: ${error.message}`);
   }
 }
 
@@ -292,8 +292,8 @@ async function createCosmosTransaction(client, senderAddress, instructionHex, se
     }),
   };
   const { gasEstimation, gasWithBuffer } = await estimateCosmosGas(client, senderAddress, msg);
-  logger.info(`Estimasi Gas: ${gasEstimation}, Gas dengan Buffer: ${gasWithBuffer}`);
-  logger.info(`Jumlah: ${isUbbn ? (instructionHex.includes("3e8") ? "0.001 ubbn" : "0.002 ubbn") : (instructionHex.includes("2710") ? "0.01 USDC" : "0.02 USDC")}`);
+  logger.info(`Gas Estimation: ${gasEstimation}, Gas with Buffer: ${gasWithBuffer}`);
+  logger.info(`Amount: ${isUbbn ? (instructionHex.includes("3e8") ? "0.001 ubbn" : "0.002 ubbn") : (instructionHex.includes("2710") ? "0.01 USDC" : "0.02 USDC")}`);
   const fee = {
     amount: [{ denom: BABYLON_TESTNET.denom, amount: feeAmount }],
     gas: gasWithBuffer.toString(),
@@ -305,58 +305,58 @@ async function cosmosMain(mode, txPerWallet, telegramBot = null, chatId = null) 
   try {
     const registry = new Registry();
     registry.register("/cosmwasm.wasm.v1.MsgExecuteContract", MsgExecuteContract);
-    logger.loading(`Menghubungkan ke RPC: ${BABYLON_TESTNET.rpcEndpoint}`);
+    logger.loading(`Connecting to RPC: ${BABYLON_TESTNET.rpcEndpoint}`);
     const walletData = await readCosmosWallets();
     const wallets = await createCosmosWalletList(walletData);
     if (wallets.length === 0) {
-      throw new Error("Tidak ada wallet valid ditemukan");
+      throw new Error("No valid wallets found");
     }
     const numTxs = txPerWallet * wallets.length;
-    logger.info(`Total transaksi untuk disimulasikan: ${numTxs} (${txPerWallet} per wallet di ${wallets.length} wallet)`);
+    logger.info(`Total transactions to simulate: ${numTxs} (${txPerWallet} per wallet across ${wallets.length} wallets)`);
     if (telegramBot && chatId) {
-      telegramBot.sendMessage(chatId, `Memulai ${numTxs} transaksi Cosmos (${txPerWallet} per wallet di ${wallets.length} wallet)`);
+      telegramBot.sendMessage(chatId, `Starting ${numTxs} Cosmos transactions (${txPerWallet} per wallet across ${wallets.length} wallets)`);
     }
     const walletInfo = [];
     for (const wallet of wallets) {
-      logger.info(`Alamat Pengirim (Babylon): ${wallet.babylonAddress}`);
-      logger.info(`Alamat Penerima (Xion): ${wallet.xionAddress}`);
+      logger.info(`Sender Address (Babylon): ${wallet.babylonAddress}`);
+      logger.info(`Receiver Address (Xion): ${wallet.xionAddress}`);
       const client = await SigningStargateClient.connectWithSigner(BABYLON_TESTNET.rpcEndpoint, wallet.babylonWallet, {
         registry,
         gasPrice: BABYLON_TESTNET.gasPrice,
       }).catch((error) => {
-        throw new Error(`Gagal terhubung ke RPC untuk ${wallet.babylonAddress}: ${error.message}`);
+        throw new Error(`Failed to connect to RPC for ${wallet.babylonAddress}: ${error.message}`);
       });
       const balance = await checkCosmosBalance(client, wallet.babylonAddress, BABYLON_TESTNET.denom);
-      logger.info(`Saldo Pengirim: ${balance} ${BABYLON_TESTNET.denom}`);
+      logger.info(`Sender Balance: ${balance} ${BABYLON_TESTNET.denom}`);
       if (balance < 5479) {
-        throw new Error(`Saldo tidak cukup untuk ${wallet.babylonAddress}: ${balance} ${BABYLON_TESTNET.denom}, perlu setidaknya 5479`);
+        throw new Error(`Insufficient balance for ${wallet.babylonAddress}: ${balance} ${BABYLON_TESTNET.denom}, need at least 5479`);
       }
       const accountInfo = await client.getAccount(wallet.babylonAddress);
       let sequence = accountInfo?.sequence;
       if (!sequence) {
-        throw new Error(`Akun tidak ditemukan di chain untuk ${wallet.babylonAddress}. Pastikan memiliki dana atau gunakan faucet.`);
+        throw new Error(`Account not found on chain for ${wallet.babylonAddress}. Ensure it has funds or use a faucet.`);
       }
       walletInfo.push({ ...wallet, sequence, client });
     }
-    logger.success(`Berhasil terhubung ke RPC untuk semua wallet`);
+    logger.success(`Successfully connected to RPC for all wallets`);
     let txCount = 0;
     for (const wallet of walletInfo) {
       const bot = wallet.telegramBotToken && wallet.telegramChatId ? new TelegramBot(wallet.telegramBotToken) : telegramBot;
       const notifyChatId = wallet.telegramChatId || chatId;
       for (let j = 0; j < txPerWallet && txCount < numTxs; j++) {
         txCount++;
-        logger.step(`Mempersiapkan transaksi ${txCount} untuk wallet ${wallet.babylonAddress}`);
+        logger.step(`Preparing transaction ${txCount} for wallet ${wallet.babylonAddress}`);
         if (bot && notifyChatId) {
-          bot.sendMessage(notifyChatId, `Mempersiapkan transaksi ${txCount} untuk wallet ${wallet.babylonAddress}`);
+          bot.sendMessage(notifyChatId, `Preparing transaction ${txCount} for wallet ${wallet.babylonAddress}`);
         }
         const instructionHex = generateCosmosInstruction(wallet.babylonAddress, wallet.xionAddress, mode);
         const { msg, fee } = await createCosmosTransaction(wallet.client, wallet.babylonAddress, instructionHex, wallet.sequence).catch((error) => {
-          throw new Error(`Persiapan transaksi gagal untuk ${wallet.babylonAddress}: ${error.message}`);
+          throw new Error(`Transaction preparation failed for ${wallet.babylonAddress}: ${error.message}`);
         });
         const result = await wallet.client.signAndBroadcast(wallet.babylonAddress, [msg], fee, "").catch((error) => {
-          throw new Error(`Gagal menyiarkan transaksi untuk ${wallet.babylonAddress}: ${error.message}`);
+          throw new Error(`Failed to broadcast transaction for ${wallet.babylonAddress}: ${error.message}`);
         });
-        const successMsg = `${timelog()} | Transaksi ${txCount} terkirim! Tx Hash: ${result.transactionHash}`;
+        const successMsg = `${timelog()} | Transaction ${txCount} sent! Tx Hash: ${result.transactionHash}`;
         logger.success(successMsg);
         if (bot && notifyChatId) {
           bot.sendMessage(notifyChatId, successMsg);
@@ -364,22 +364,22 @@ async function cosmosMain(mode, txPerWallet, telegramBot = null, chatId = null) 
         wallet.sequence++;
         if (txCount < numTxs) {
           const delay = getRandomDelay();
-          logger.info(`Menunggu ${delay / 1000} detik sebelum transaksi berikutnya...`);
+          logger.info(`Waiting ${delay / 1000} seconds before next transaction...`);
           if (bot && notifyChatId) {
-            bot.sendMessage(notifyChatId, `Menunggu ${delay / 1000} detik sebelum transaksi berikutnya...`);
+            bot.sendMessage(notifyChatId, `Waiting ${delay / 1000} seconds before next transaction...`);
           }
           await sleep(delay);
         }
       }
     }
-    logger.success(`Semua transaksi selesai!`);
+    logger.success(`All transactions completed!`);
     if (telegramBot && chatId) {
-      telegramBot.sendMessage(chatId, `Semua transaksi Cosmos selesai!`);
+      telegramBot.sendMessage(chatId, `All Cosmos transactions completed!`);
     }
   } catch (error) {
-    logger.error(`Kesalahan: ${error.message}`);
+    logger.error(`Error: ${error.message}`);
     if (telegramBot && chatId) {
-      telegramBot.sendMessage(chatId, `Kesalahan Cosmos: ${error.message}`);
+      telegramBot.sendMessage(chatId, `Cosmos Error: ${error.message}`);
     }
   }
 }
@@ -389,20 +389,20 @@ async function checkEvmBalanceAndApprove(wallet, usdcAddress, spenderAddress) {
   const usdcContract = new ethers.Contract(usdcAddress, USDC_ABI, wallet);
   const balance = await usdcContract.balanceOf(wallet.address);
   if (balance === 0n) {
-    logger.error(`${wallet.address} tidak memiliki cukup USDC. Isi wallet terlebih dahulu!`);
+    logger.error(`${wallet.address} does not have enough USDC. Fund the wallet first!`);
     return false;
   }
   const allowance = await usdcContract.allowance(wallet.address, spenderAddress);
   if (allowance === 0n) {
-    logger.loading(`USDC belum disetujui. Mengirim transaksi persetujuan...`);
+    logger.loading(`USDC not approved. Sending approval transaction...`);
     const approveAmount = ethers.MaxUint256;
     try {
       const tx = await usdcContract.approve(spenderAddress, approveAmount);
       const receipt = await tx.wait();
-      logger.success(`Persetujuan dikonfirmasi: ${BASE_EXPLORER_URL}/tx/${receipt.hash}`);
+      logger.success(`Approval confirmed: ${BASE_EXPLORER_URL}/tx/${receipt.hash}`);
       await sleep(3000);
     } catch (err) {
-      logger.error(`Persetujuan gagal: ${err.message}`);
+      logger.error(`Approval failed: ${err.message}`);
       return false;
     }
   }
@@ -435,11 +435,11 @@ async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
         return result[0].packet_hash;
       }
     } catch (e) {
-      logger.error(`Kesalahan paket: ${e.message}`);
+      logger.error(`Packet error: ${e.message}`);
     }
     await sleep(intervalMs);
   }
-  logger.warn(`Tidak ada hash paket ditemukan setelah ${retries} percobaan.`);
+  logger.warn(`No packet hash found after ${retries} attempts.`);
   return null;
 }
 
@@ -451,7 +451,7 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
     destinationName = "Babylon";
     channelId = 7;
     if (!recipientAddress) {
-      const msg = `Melewati wallet '${walletInfo.name || "Tanpa Nama"}': Alamat Babylon tidak ada.`;
+      const msg = `Skipping wallet '${walletInfo.name || "No Name"}': No Babylon address provided.`;
       logger.warn(msg);
       if (telegramBot && chatId) telegramBot.sendMessage(chatId, msg);
       return;
@@ -461,66 +461,59 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
     destinationName = "Holesky";
     channelId = 8;
   } else {
-    const msg = `Tujuan tidak valid: ${destination}`;
+    const msg = `Invalid destination: ${destination}`;
     logger.error(msg);
     if (telegramBot && chatId) telegramBot.sendMessage(chatId, msg);
     return;
   }
-  const msg = `Mengirim ${maxTransaction} Transaksi dari Sepolia ke ${destinationName} dari ${wallet.address} (${walletInfo.name || "Tanpa Nama"})`;
+  const msg = `Sending ${maxTransaction} Transactions from Sepolia to ${destinationName} from ${wallet.address} (${walletInfo.name || "No Name"})`;
   logger.loading(msg);
   if (telegramBot && chatId) telegramBot.sendMessage(chatId, msg);
   const shouldProceed = await checkEvmBalanceAndApprove(wallet, USDC_ADDRESS, EVM_CONTRACT_ADDRESS);
   if (!shouldProceed) {
-    if (telegramBot && chatId) telegramBot.sendMessage(chatId, `Gagal melanjutkan dengan ${walletInfo.name || "Tanpa Nama"}: USDC tidak cukup atau persetujuan gagal.`);
+    if (telegramBot && chatId) telegramBot.sendMessage(chatId, `Failed to proceed with ${walletInfo.name || "No Name"}: Insufficient USDC or approval failed.`);
     return;
   }
   const contract = new ethers.Contract(EVM_CONTRACT_ADDRESS, UCS03_ABI, wallet);
   const senderHex = wallet.address.slice(2).toLowerCase();
   const recipientHex = destination === "babylon" ? Buffer.from(recipientAddress, "utf8").toString("hex") : senderHex;
-  const timeoutHeight = 0;
-  if (destination === "babylon") {
-    operand = `0x...${senderHex}...${recipientHex}...`;
-} else {
-    operand = `0x...${senderHex}...`;
-} // Pastikan ini ada
-
-for (let i = 1; i <= maxTransaction; i++) {
-    logger.step(`${walletInfo.name || "Tanpa Nama"} | Transaksi ${i}/${maxTransaction}`);
-    if (telegramBot && chatId) telegramBot.sendMessage(chatId, `${walletInfo.name || "Tanpa Nama"} | Transaksi ${i}/${maxTransaction}`);
-    
+  operand = `0x${senderHex}${recipientHex}`;
+  for (let i = 1; i <= maxTransaction; i++) {
+    logger.step(`${walletInfo.name || "No Name"} | Transaction ${i}/${maxTransaction}`);
+    if (telegramBot && chatId) telegramBot.sendMessage(chatId, `${walletInfo.name || "No Name"} | Transaction ${i}/${maxTransaction}`);
     const now = BigInt(Date.now()) * 1_000_000n;
     const oneDayNs = 86_400_000_000_000n;
     const timeoutTimestamp = (now + oneDayNs * 1n).toString();
     const timestampNow = Math.floor(Date.now() / 1000);
-    const salt = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder.encode(["address", "uint256"], [wallet.address, timestampNow]));
-    const instruction = { version: "0", opcode: "0x02", operand };
-    
+    const salt = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(["address", "uint256"], [wallet.address, timestampNow]));
+    const instruction = { version: 0, opcode: "0x02", operand };
     try {
-        const tx = await contract.send(channelId, timeoutHeight, timeoutTimestamp, salt, instruction);
-        await tx.wait(1);
-        const successMsg = `${timelog()} | ${walletInfo.name || "Tanpa Nama"} | Transaksi Dikonfirmasi: ${BASE_EXPLORER_URL}/tx/${tx.hash}`;
-        logger.success(successMsg);
-        if (telegramBot && chatId) telegramBot.sendMessage(chatId, successMsg);
-        const txHash = tx.hash.startsWith("0x") ? tx.hash : `0x${tx.hash}`;
-        const packetHash = await pollPacketHash(txHash);
-        if (packetHash) {
-            const packetMsg = `${timelog()} | ${walletInfo.name || "Tanpa Nama"} | Paket Dikirim: ${UNION_URL}/${packetHash}`;
-            logger.info(packetMsg);
-            if (telegramBot && chatId) telegramBot.sendMessage(chatId, packetMsg);
-        }
+      const tx = await contract.send(channelId, 0, timeoutTimestamp, salt, instruction);
+      const receipt = await tx.wait(1);
+      const successMsg = `${timelog()} | ${walletInfo.name || "No Name"} | Transaction Confirmed: ${BASE_EXPLORER_URL}/tx/${receipt.hash}`;
+      logger.success(successMsg);
+      if (telegramBot && chatId) telegramBot.sendMessage(chatId, successMsg);
+      const txHash = receipt.hash.startsWith("0x") ? receipt.hash : `0x${receipt.hash}`;
+      const packetHash = await pollPacketHash(txHash);
+      if (packetHash) {
+        const packetMsg = `${timelog()} | ${walletInfo.name || "No Name"} | Packet Sent: ${UNION_URL}/${packetHash}`;
+        logger.info(packetMsg);
+        if (telegramBot && chatId) telegramBot.sendMessage(chatId, packetMsg);
+      }
     } catch (err) {
-        const errMsg = `Gagal untuk ${wallet.address}: ${err.message}`;
-        logger.error(errMsg);
-        if (telegramBot && chatId) telegramBot.sendMessage(chatId, errMsg);
+      const errMsg = `Failed for ${wallet.address}: ${err.message}`;
+      logger.error(errMsg);
+      if (telegramBot && chatId) telegramBot.sendMessage(chatId, errMsg);
     }
-    
     if (i < maxTransaction) {
-        const delay = getRandomDelay();
-        logger.info(`Menunggu ${delay / 1000} detik sebelum transaksi berikutnya...`);
-        if (telegramBot && chatId) telegramBot.sendMessage(chatId, `Menunggu ${delay / 1000} detik sebelum transaksi berikutnya...`);
-        await sleep(delay);
+      const delay = getRandomDelay();
+      logger.info(`Waiting ${delay / 1000} seconds before next transaction...`);
+      if (telegramBot && chatId) telegramBot.sendMessage(chatId, `Waiting ${delay / 1000} seconds before next transaction...`);
+      await sleep(delay);
     }
-} // Pastikan ini ada
+  }
+}
+
 // Fungsi untuk memuat wallet EVM dari .env
 function loadEvmWallets() {
   const wallets = [];
@@ -530,7 +523,7 @@ function loadEvmWallets() {
     const babylonAddress = process.env[`BABYLON_ADDRESS_${index}`];
     if (!privateKey) break;
     if (!privateKey.startsWith("0x") || !/^(0x)[0-9a-fA-F]{64}$/.test(privateKey)) {
-      logger.warn(`Kunci privat ${index} tidak valid: harus berupa string heksadesimal 64 karakter yang diawali 0x`);
+      logger.warn(`Private key ${index} invalid: must be a 64-character hexadecimal string starting with 0x`);
     } else {
       wallets.push({
         name: `Wallet${index}`,
@@ -547,48 +540,48 @@ function loadEvmWallets() {
 async function mainConsole() {
   while (true) {
     console.log(`\n=== Union Testnet Auto Bot (by airdropnode - ${TELEGRAM_LINK}) ===`);
-    console.log("1. Cosmos (Babylon ke Xion)");
-    console.log("2. EVM (Sepolia ke Holesky/Babylon)");
-    console.log("3. Keluar");
-    const choice = prompt("Pilih opsi (1-3): ").trim();
+    console.log("1. Cosmos (Babylon to Xion)");
+    console.log("2. EVM (Sepolia to Holesky/Babylon)");
+    console.log("3. Exit");
+    const choice = prompt("Select an option (1-3): ").trim();
     if (choice === "3") {
-      logger.info("Keluar dari program.");
+      logger.info("Exiting program.");
       process.exit(0);
     }
     if (!["1", "2"].includes(choice)) {
-      logger.error("Opsi salah. Pilih 1, 2, atau 3.");
+      logger.error("Invalid option. Please select 1, 2, or 3.");
       continue;
     }
-    const maxTransactionInput = prompt("Masukkan jumlah transaksi per wallet: ").trim();
+    const maxTransactionInput = prompt("Enter the number of transactions per wallet: ").trim();
     const maxTransaction = parseInt(maxTransactionInput);
     if (isNaN(maxTransaction) || maxTransaction <= 0) {
-      logger.error("Masukkan angka positif yang valid.");
+      logger.error("Please enter a valid positive number.");
       continue;
     }
     if (choice === "1") {
-      console.log("\nPilih submode untuk Cosmos:");
-      console.log("1. Babylon ke Xion (ubbn)");
-      console.log("2. USDC Babylon ke USDC Xion");
-      console.log("3. Acak (ubbn atau USDC)");
-      const subMode = prompt("Pilih submode (1-3): ").trim();
+      console.log("\nSelect submode for Cosmos:");
+      console.log("1. Babylon to Xion (ubbn)");
+      console.log("2. USDC Babylon to USDC Xion");
+      console.log("3. Random (ubbn or USDC)");
+      const subMode = prompt("Select submode (1-3): ").trim();
       if (!["1", "2", "3"].includes(subMode)) {
-        logger.error("Submode salah. Pilih 1, 2, atau 3.");
+        logger.error("Invalid submode. Please select 1, 2, or 3.");
         continue;
       }
       await cosmosMain(subMode, maxTransaction);
     } else if (choice === "2") {
-      console.log("\nPilih submode untuk EVM:");
-      console.log("1. Sepolia ke Holesky");
-      console.log("2. Sepolia ke Babylon");
-      console.log("3. Acak (Holesky dan Babylon)");
-      const subMode = prompt("Pilih submode (1-3): ").trim();
+      console.log("\nSelect submode for EVM:");
+      console.log("1. Sepolia to Holesky");
+      console.log("2. Sepolia to Babylon");
+      console.log("3. Random (Holesky and Babylon)");
+      const subMode = prompt("Select submode (1-3): ").trim();
       if (!["1", "2", "3"].includes(subMode)) {
-        logger.error("Submode salah. Pilih 1, 2, atau 3.");
+        logger.error("Invalid submode. Please select 1, 2, or 3.");
         continue;
       }
       const wallets = loadEvmWallets();
       if (wallets.length === 0) {
-        logger.error("Tidak ada wallet ditemukan di .env. Tambahkan PRIVATE_KEY_...");
+        logger.error("No wallets found in .env. Please add PRIVATE_KEY_...");
         continue;
       }
       for (const walletInfo of wallets) {
@@ -597,9 +590,9 @@ async function mainConsole() {
         } else if (subMode === "2") {
           await sendEvmTransaction(walletInfo, maxTransaction, "babylon");
         } else if (subMode === "3") {
-          const destinations = ["holesky", "babylon"].filter(dest => dest !== "babylon" || walletInfo.babylonAddress);
+          const destinations = ["holesky", "babylon"].filter((dest) => dest !== "babylon" || walletInfo.babylonAddress);
           if (destinations.length === 0) {
-            logger.warn(`Melewati wallet '${walletInfo.name}': Tidak ada tujuan valid (alamat Babylon tidak ada).`);
+            logger.warn(`Skipping wallet '${walletInfo.name}': No valid destinations (Babylon address missing).`);
             continue;
           }
           for (let i = 0; i < maxTransaction; i++) {
@@ -609,7 +602,7 @@ async function mainConsole() {
         }
       }
       if (wallets.length === 0) {
-        logger.warn("Tidak ada wallet yang diproses. Periksa .env untuk entri valid.");
+        logger.warn("No wallets processed. Check .env for valid entries.");
       }
     }
   }
@@ -621,7 +614,7 @@ function mainTelegram() {
   const allowedChatId = process.env.TELEGRAM_CHAT_ID;
 
   if (!token || !allowedChatId) {
-    logger.warn("Bot Telegram tidak dikonfigurasi: TELEGRAM_BOT_TOKEN atau TELEGRAM_CHAT_ID tidak ditemukan di .env. Memulai dalam mode konsol.");
+    logger.warn("Telegram bot not configured: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in .env. Starting in console mode.");
     return mainConsole();
   }
 
@@ -632,20 +625,20 @@ function mainTelegram() {
   const mainMenu = {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Cosmos (Babylon ke Xion)", callback_data: "mode_cosmos" }],
-        [{ text: "EVM (Sepolia ke Holesky/Babylon)", callback_data: "mode_evm" }],
-        [{ text: "Tambah Wallet (Cosmos)", callback_data: "add_wallet_cosmos" }],
-        [{ text: "Daftar Wallet (Cosmos)", callback_data: "list_wallets_cosmos" }],
-        [{ text: "Bantuan", callback_data: "help" }],
+        [{ text: "Cosmos (Babylon to Xion)", callback_data: "mode_cosmos" }],
+        [{ text: "EVM (Sepolia to Holesky/Babylon)", callback_data: "mode_evm" }],
+        [{ text: "Add Wallet (Cosmos)", callback_data: "add_wallet_cosmos" }],
+        [{ text: "List Wallets (Cosmos)", callback_data: "list_wallets_cosmos" }],
+        [{ text: "Help", callback_data: "help" }],
         [{ text: "Join Telegram (airdropnode)", url: TELEGRAM_LINK }],
       ],
     },
   };
 
   // Tombol kembali ke beranda
-  const backToHomeButton = [{ text: "Kembali ke Beranda", callback_data: "home" }];
+  const backToHomeButton = [{ text: "Back to Home", callback_data: "home" }];
 
-  function showMainMenu(chatId, message = `Selamat datang di Union Testnet Auto Bot! (by airdropnode - ${TELEGRAM_LINK})\nPilih opsi:`) {
+  function showMainMenu(chatId, message = `Welcome to Union Testnet Auto Bot! (by airdropnode - ${TELEGRAM_LINK})\nSelect an option:`) {
     delete userState[chatId];
     bot.sendMessage(chatId, message, mainMenu);
   }
@@ -654,7 +647,7 @@ function mainTelegram() {
   bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id.toString();
     if (chatId !== allowedChatId) {
-      bot.sendMessage(chatId, "Akses tidak diizinkan.");
+      bot.sendMessage(chatId, "Access denied.");
       return;
     }
     showMainMenu(chatId);
@@ -664,7 +657,7 @@ function mainTelegram() {
   bot.on("callback_query", async (query) => {
     const chatId = query.message.chat.id.toString();
     if (chatId !== allowedChatId) {
-      bot.sendMessage(chatId, "Akses tidak diizinkan.");
+      bot.sendMessage(chatId, "Access denied.");
       bot.answerCallbackQuery(query.id);
       return;
     }
@@ -672,14 +665,14 @@ function mainTelegram() {
     bot.answerCallbackQuery(query.id);
 
     if (data === "home") {
-      showMainMenu(chatId, "Kembali ke menu utama.");
+      showMainMenu(chatId, "Back to main menu.");
       return;
     }
 
     if (data === "help") {
       bot.sendMessage(
         chatId,
-        "Aksi yang tersedia:\n- Cosmos Mode: Jalankan transaksi Babylon ke Xion\n- EVM Mode: Transaksi Sepolia ke Holesky/Babylon\n- Tambah Wallet: Tambah wallet Cosmos baru\n- Daftar Wallet: Lihat wallet Cosmos\n- Bantuan: Tampilkan pesan ini",
+        "Available actions:\n- Cosmos Mode: Run Babylon to Xion transactions\n- EVM Mode: Sepolia to Holesky/Babylon transactions\n- Add Wallet: Add new Cosmos wallet\n- List Wallets: View Cosmos wallets\n- Help: Show this message",
         {
           reply_markup: {
             inline_keyboard: [backToHomeButton],
@@ -693,7 +686,7 @@ function mainTelegram() {
       userState[chatId] = { step: "add_wallet_cosmos_input" };
       bot.sendMessage(
         chatId,
-        "Masukkan detail wallet dengan format:\nmnemonic: <12-24 kata mnemonic>\nxion_alamat: <alamat xion>\ntoken_bot: <token bot Telegram>\nchat_id: <chat ID Telegram>",
+        "Enter wallet details in the format:\nmnemonic: <12-24 word mnemonic>\nxion_alamat: <xion address>\ntoken_bot: <Telegram bot token>\nchat_id: <Telegram chat ID>",
         {
           reply_markup: {
             inline_keyboard: [backToHomeButton],
@@ -706,15 +699,20 @@ function mainTelegram() {
     if (data === "list_wallets_cosmos") {
       const wallets = await readCosmosWallets().catch(() => []);
       if (!wallets || wallets.length === 0) {
-        bot.sendMessage(chatId, "Tidak ada wallet Cosmos ditemukan.", {
+        bot.sendMessage(chatId, "No Cosmos wallets found.", {
           reply_markup: {
             inline_keyboard: [backToHomeButton],
           },
         });
         return;
       }
-      const walletList = wallets.map(w => `Mnemonic: ${w.credential.substring(0, 20)}...\nXion: ${w.xionAddress}\nToken Bot: ${w.telegramBotToken || 'Tidak Ada'}\nChat ID: ${w.telegramChatId || 'Tidak Ada'}`).join("\n\n");
-      bot.sendMessage(chatId, `Daftar Wallet Cosmos:\n\n${walletList}`, {
+      const walletList = wallets
+        .map(
+          (w) =>
+            `Mnemonic: ${w.credential.substring(0, 20)}...\nXion: ${w.xionAddress}\nToken Bot: ${w.telegramBotToken || "None"}\nChat ID: ${w.telegramChatId || "None"}`
+        )
+        .join("\n\n");
+      bot.sendMessage(chatId, `List of Cosmos Wallets:\n\n${walletList}`, {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
@@ -724,12 +722,12 @@ function mainTelegram() {
 
     if (data === "mode_cosmos") {
       userState[chatId] = { step: "select_cosmos_mode" };
-      bot.sendMessage(chatId, "Pilih mode Cosmos:", {
+      bot.sendMessage(chatId, "Select Cosmos mode:", {
         reply_markup: {
           inline_keyboard: [
-            [{ text: "Babylon ke Xion (ubbn)", callback_data: "cosmos_mode_1" }],
-            [{ text: "USDC Babylon ke USDC Xion", callback_data: "cosmos_mode_2" }],
-            [{ text: "Acak (ubbn atau USDC)", callback_data: "cosmos_mode_random" }],
+            [{ text: "Babylon to Xion (ubbn)", callback_data: "cosmos_mode_1" }],
+            [{ text: "USDC Babylon to USDC Xion", callback_data: "cosmos_mode_2" }],
+            [{ text: "Random (ubbn or USDC)", callback_data: "cosmos_mode_random" }],
             backToHomeButton,
           ],
         },
@@ -739,12 +737,12 @@ function mainTelegram() {
 
     if (data === "mode_evm") {
       userState[chatId] = { step: "select_evm_mode" };
-      bot.sendMessage(chatId, "Pilih mode EVM:", {
+      bot.sendMessage(chatId, "Select EVM mode:", {
         reply_markup: {
           inline_keyboard: [
-            [{ text: "Sepolia ke Holesky", callback_data: "evm_mode_holesky" }],
-            [{ text: "Sepolia ke Babylon", callback_data: "evm_mode_babylon" }],
-            [{ text: "Acak (Holesky dan Babylon)", callback_data: "evm_mode_random" }],
+            [{ text: "Sepolia to Holesky", callback_data: "evm_mode_holesky" }],
+            [{ text: "Sepolia to Babylon", callback_data: "evm_mode_babylon" }],
+            [{ text: "Random (Holesky and Babylon)", callback_data: "evm_mode_random" }],
             backToHomeButton,
           ],
         },
@@ -755,7 +753,7 @@ function mainTelegram() {
     if (data.startsWith("cosmos_mode_")) {
       const mode = data.split("_")[2] === "random" ? "3" : data.split("_")[2];
       userState[chatId] = { step: "cosmos_transactions", mode };
-      bot.sendMessage(chatId, "Masukkan jumlah transaksi per wallet untuk Cosmos:", {
+      bot.sendMessage(chatId, "Enter the number of transactions per wallet for Cosmos:", {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
@@ -766,7 +764,7 @@ function mainTelegram() {
     if (data.startsWith("evm_mode_")) {
       const destination = data.split("_")[2];
       userState[chatId] = { step: "evm_transactions", destination };
-      bot.sendMessage(chatId, "Masukkan jumlah transaksi per wallet untuk EVM:", {
+      bot.sendMessage(chatId, "Enter the number of transactions per wallet for EVM:", {
         reply_markup: {
           inline_keyboard: [backToHomeButton],
         },
@@ -776,165 +774,166 @@ function mainTelegram() {
   });
 
   // Handle text input
-bot.on("message", async (msg) => {
-  const chatId = msg.chat.id.toString();
+  bot.on("message", async (msg) => {
+    const chatId = msg.chat.id.toString();
 
-  // Check if chat ID is allowed
-  if (chatId !== allowedChatId) {
-    await bot.sendMessage(chatId, "Access denied.");
-    return;
-  }
+    // Check if chat ID is allowed
+    if (chatId !== allowedChatId) {
+      await bot.sendMessage(chatId, "Access denied.");
+      return;
+    }
 
-  // Ignore commands
-  if (msg.text && msg.text.startsWith("/")) {
-    return;
-  }
+    // Ignore commands
+    if (msg.text && msg.text.startsWith("/")) {
+      return;
+    }
 
-  // Check user state
-  if (!userState[chatId]) {
-    await showMainMenu(chatId, "Please use the buttons to interact.");
-    return;
-  }
+    // Check user state
+    if (!userState[chatId]) {
+      await showMainMenu(chatId, "Please use the buttons to interact.");
+      return;
+    }
 
-  const state = userState[chatId];
+    const state = userState[chatId];
 
-  // Handle Cosmos wallet input
-  if (state.step === "add_wallet_cosmos_input") {
-    try {
-      const lines = msg.text.split("\n").map((line) => line.trim());
-      const wallet = {};
-      lines.forEach((line) => {
-        const [key, value] = line.split(":").map((s) => s.trim());
-        if (key && value) wallet[key] = value;
-      });
+    // Handle Cosmos wallet input
+    if (state.step === "add_wallet_cosmos_input") {
+      try {
+        const lines = msg.text.split("\n").map((line) => line.trim());
+        const wallet = {};
+        lines.forEach((line) => {
+          const [key, value] = line.split(":").map((s) => s.trim());
+          if (key && value) wallet[key] = value;
+        });
 
-      if (!wallet.mnemonic || !wallet.xion_alamat) {
-        await bot.sendMessage(chatId, "Invalid format. Please provide mnemonic and xion_alamat.", {
+        if (!wallet.mnemonic || !wallet.xion_alamat) {
+          await bot.sendMessage(chatId, "Invalid format. Please provide mnemonic and xion_alamat.", {
+            reply_markup: { inline_keyboard: [backToHomeButton] },
+          });
+          return;
+        }
+
+        const isMnemonicValid = wallet.mnemonic.split(" ").length === 12 || wallet.mnemonic.split(" ").length === 24;
+        if (!isMnemonicValid) {
+          await bot.sendMessage(chatId, "Invalid mnemonic. Must be 12 or 24 words.", {
+            reply_markup: { inline_keyboard: [backToHomeButton] },
+          });
+          return;
+        }
+
+        if (!wallet.xion_alamat.startsWith(XION_TESTNET.prefix) || wallet.xion_alamat.length !== 43) {
+          await bot.sendMessage(
+            chatId,
+            `Invalid Xion address: ${wallet.xion_alamat}. Must start with ${XION_TESTNET.prefix} and be 43 characters long.`,
+            { reply_markup: { inline_keyboard: [backToHomeButton] } }
+          );
+          return;
+        }
+
+        const wallets = await readCosmosWallets().catch(() => []);
+        wallets.push({
+          credential: wallet.mnemonic,
+          xionAddress: wallet.xion_alamat,
+          telegramBotToken: wallet.token_bot || "",
+          telegramChatId: wallet.chat_id || "",
+        });
+        await fs.writeFile(WALLET_FILE, JSON.stringify(wallets, null, 2));
+        await bot.sendMessage(chatId, "Cosmos wallet added successfully!", {
           reply_markup: { inline_keyboard: [backToHomeButton] },
         });
-        return;
-      }
-
-      const isMnemonicValid = wallet.mnemonic.split(" ").length === 12 || wallet.mnemonic.split(" ").length === 24;
-      if (!isMnemonicValid) {
-        await bot.sendMessage(chatId, "Invalid mnemonic. Must be 12 or 24 words.", {
+        delete userState[chatId];
+      } catch (err) {
+        await bot.sendMessage(chatId, `Failed to add wallet: ${err.message}`, {
           reply_markup: { inline_keyboard: [backToHomeButton] },
         });
-        return;
       }
+      return;
+    }
 
-      if (!wallet.xion_alamat.startsWith(XION_TESTNET.prefix) || wallet.xion_alamat.length !== 43) {
-        await bot.sendMessage(
-          chatId,
-          `Invalid Xion address: ${wallet.xion_alamat}. Must start with ${XION_TESTNET.prefix} and be 43 characters long.`,
-          { reply_markup: { inline_keyboard: [backToHomeButton] } }
-        );
+    // Handle Cosmos transactions
+    if (state.step === "cosmos_transactions") {
+      const maxTransaction = parseInt(msg.text.trim());
+      if (isNaN(maxTransaction) || maxTransaction <= 0) {
+        await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
+        });
         return;
       }
 
       const wallets = await readCosmosWallets().catch(() => []);
-      wallets.push({
-        credential: wallet.mnemonic,
-        xionAddress: wallet.xion_alamat,
-        telegramBotToken: wallet.token_bot || "",
-        telegramChatId: wallet.chat_id || "",
-      });
-      await fs.writeFile(WALLET_FILE, JSON.stringify(wallets, null, 2));
-      await bot.sendMessage(chatId, "Cosmos wallet added successfully!", {
-        reply_markup: { inline_keyboard: [backToHomeButton] },
-      });
-      delete userState[chatId];
-    } catch (err) {
-      await bot.sendMessage(chatId, `Failed to add wallet: ${err.message}`, {
-        reply_markup: { inline_keyboard: [backToHomeButton] },
-      });
-    }
-    return;
-  }
+      if (wallets.length === 0) {
+        await bot.sendMessage(chatId, "No Cosmos wallets found. Please add a wallet first.", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
+        });
+        delete userState[chatId];
+        return;
+      }
 
-  // Handle Cosmos transactions
-  if (state.step === "cosmos_transactions") {
-    const maxTransaction = parseInt(msg.text.trim());
-    if (isNaN(maxTransaction) || maxTransaction <= 0) {
-      await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+      await bot.sendMessage(chatId, `Starting ${maxTransaction} Cosmos transactions (mode ${state.mode})...`, {
         reply_markup: { inline_keyboard: [backToHomeButton] },
       });
-      return;
-    }
-
-    const wallets = await readCosmosWallets().catch(() => []);
-    if (wallets.length === 0) {
-      await bot.sendMessage(chatId, "No Cosmos wallets found. Please add a wallet first.", {
+      await cosmosMain(state.mode, maxTransaction, bot, chatId);
+      await bot.sendMessage(chatId, "Cosmos transaction process completed.", {
         reply_markup: { inline_keyboard: [backToHomeButton] },
       });
       delete userState[chatId];
       return;
     }
 
-    await bot.sendMessage(chatId, `Starting ${maxTransaction} Cosmos transactions (mode ${state.mode})...`, {
-      reply_markup: { inline_keyboard: [backToHomeButton] },
-    });
-    await cosmosMain(state.mode, maxTransaction, bot, chatId);
-    await bot.sendMessage(chatId, "Cosmos transaction process completed.", {
-      reply_markup: { inline_keyboard: [backToHomeButton] },
-    });
-    delete userState[chatId];
-    return;
-  }
+    // Handle EVM transactions
+    if (state.step === "evm_transactions") {
+      const maxTransaction = parseInt(msg.text.trim());
+      if (isNaN(maxTransaction) || maxTransaction <= 0) {
+        await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
+        });
+        return;
+      }
 
-  // Handle EVM transactions
-  if (state.step === "evm_transactions") {
-    const maxTransaction = parseInt(msg.text.trim());
-    if (isNaN(maxTransaction) || maxTransaction <= 0) {
-      await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+      const wallets = loadEvmWallets();
+      if (wallets.length === 0) {
+        await bot.sendMessage(chatId, "No EVM wallets found in .env. Please add PRIVATE_KEY_...", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
+        });
+        delete userState[chatId];
+        return;
+      }
+
+      await bot.sendMessage(chatId, `Starting ${maxTransaction} EVM transactions to ${state.destination}...`, {
         reply_markup: { inline_keyboard: [backToHomeButton] },
       });
-      return;
-    }
 
-    const wallets = loadEvmWallets();
-    if (wallets.length === 0) {
-      await bot.sendMessage(chatId, "No EVM wallets found in .env. Please add PRIVATE_KEY_...", {
-        reply_markup: { inline_keyboard: [backToHomeButton] },
-      });
-      delete userState[chatId];
-      return;
-    }
-
-    await bot.sendMessage(chatId, `Starting ${maxTransaction} EVM transactions to ${state.destination}...`, {
-      reply_markup: { inline_keyboard: [backToHomeButton] },
-    });
-
-    for (const walletInfo of wallets) {
-      if (state.destination === "holesky") {
-        await sendEvmTransaction(walletInfo, maxTransaction, "holesky", bot, chatId);
-      } else if (state.destination === "babylon") {
-        await sendEvmTransaction(walletInfo, maxTransaction, "babylon", bot, chatId);
-      } else if (state.destination === "random") {
-        const destinations = ["holesky", "babylon"].filter((dest) => dest !== "babylon" || walletInfo.babylonAddress);
-        if (destinations.length === 0) {
-          await bot.sendMessage(chatId, `Skipping wallet '${walletInfo.name}': No valid destinations (Babylon address missing).`, {
-            reply_markup: { inline_keyboard: [backToHomeButton] },
-          });
-          continue;
-        }
-        for (let i = 0; i < maxTransaction; i++) {
-          const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
-          await sendEvmTransaction(walletInfo, 1, randomDest, bot, chatId);
+      for (const walletInfo of wallets) {
+        if (state.destination === "holesky") {
+          await sendEvmTransaction(walletInfo, maxTransaction, "holesky", bot, chatId);
+        } else if (state.destination === "babylon") {
+          await sendEvmTransaction(walletInfo, maxTransaction, "babylon", bot, chatId);
+        } else if (state.destination === "random") {
+          const destinations = ["holesky", "babylon"].filter((dest) => dest !== "babylon" || walletInfo.babylonAddress);
+          if (destinations.length === 0) {
+            await bot.sendMessage(chatId, `Skipping wallet '${walletInfo.name}': No valid destinations (Babylon address missing).`, {
+              reply_markup: { inline_keyboard: [backToHomeButton] },
+            });
+            continue;
+          }
+          for (let i = 0; i < maxTransaction; i++) {
+            const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
+            await sendEvmTransaction(walletInfo, 1, randomDest, bot, chatId);
+          }
         }
       }
+
+      await bot.sendMessage(chatId, "EVM transaction process completed.", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
+      });
+      delete userState[chatId];
+      return;
     }
+  });
 
-    await bot.sendMessage(chatId, "EVM transaction process completed.", {
-      reply_markup: { inline_keyboard: [backToHomeButton] },
-    });
-    delete userState[chatId];
-    return;
-  }
-}); // Close bot.on("message", ...)
-
-// Log bot startup
-logger.info("Telegram bot started successfully.");
+  // Log bot startup
+  logger.info("Telegram bot started successfully.");
+}
 
 // Main function
 async function main() {
@@ -948,8 +947,7 @@ async function main() {
     logger.error(`Main error: ${err.message}`);
     process.exit(1);
   }
-} // Close main function
+}
 
 // Run main function
 main();
-  
