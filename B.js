@@ -785,12 +785,12 @@ bot.on("message", async (msg) => {
     return;
   }
 
-  // Ignore commands (messages starting with "/")
+  // Ignore commands
   if (msg.text && msg.text.startsWith("/")) {
     return;
   }
 
-  // Check if user state exists
+  // Check user state
   if (!userState[chatId]) {
     await showMainMenu(chatId, "Please use the buttons to interact.");
     return;
@@ -808,7 +808,6 @@ bot.on("message", async (msg) => {
         if (key && value) wallet[key] = value;
       });
 
-      // Validate wallet input
       if (!wallet.mnemonic || !wallet.xion_alamat) {
         await bot.sendMessage(chatId, "Invalid format. Please provide mnemonic and xion_alamat.", {
           reply_markup: { inline_keyboard: [backToHomeButton] },
@@ -816,7 +815,6 @@ bot.on("message", async (msg) => {
         return;
       }
 
-      // Validate mnemonic (12 or 24 words)
       const isMnemonicValid = wallet.mnemonic.split(" ").length === 12 || wallet.mnemonic.split(" ").length === 24;
       if (!isMnemonicValid) {
         await bot.sendMessage(chatId, "Invalid mnemonic. Must be 12 or 24 words.", {
@@ -825,7 +823,6 @@ bot.on("message", async (msg) => {
         return;
       }
 
-      // Validate Xion address
       if (!wallet.xion_alamat.startsWith(XION_TESTNET.prefix) || wallet.xion_alamat.length !== 43) {
         await bot.sendMessage(
           chatId,
@@ -835,7 +832,6 @@ bot.on("message", async (msg) => {
         return;
       }
 
-      // Save new wallet
       const wallets = await readCosmosWallets().catch(() => []);
       wallets.push({
         credential: wallet.mnemonic,
@@ -935,7 +931,7 @@ bot.on("message", async (msg) => {
     delete userState[chatId];
     return;
   }
-});
+}); // Close bot.on("message", ...)
 
 // Log bot startup
 logger.info("Telegram bot started successfully.");
@@ -952,7 +948,8 @@ async function main() {
     logger.error(`Main error: ${err.message}`);
     process.exit(1);
   }
-}
+} // Close main function
 
 // Run main function
 main();
+  
