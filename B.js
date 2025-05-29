@@ -776,183 +776,183 @@ function mainTelegram() {
   });
 
   // Handle text input
-  bot.on("message", async (msg) => {
-    const chatId = msg.chat.id.toString();
-    if (chatId !== allowedChatId) {
-      bot.sendMessage(chatId, "Akses tidak diizinkan.");
-      return;
-    }
-    if (msg.text && msg.text.startsWith("/")) {
-      return;
-    }
-    if (!userState[chatId]) {
-      showMainMenu(chatId, "Harap gunakan tombol untuk berinteraksi.");
-      return;
-    }
-    const state = userState[chatId];
+bot.on("message", async (msg) => {
+  const chatId = msg.chat.id.toString();
 
-    if (state.step === "add_wallet_cosmos_input") {
-      try {
-        const lines = msg.text.split("\n").map(line => line.trim());
-        const wallet = {};
-        lines.forEach(line => {
-          const [key, value] = line.split(":").map(s => s.trim());
-          wallet[key] = value;
-        });
-        if (!wallet.mnemonic || !wallet.xion_alamat) {
-          bot.sendMessage(chatId, "Format salah. Masukkan mnemonic dan xion_alamat.", {
-            reply_markup: {
-              inline_keyboard: [backToHomeButton],
-            },
-          });
-          return;
-        }
-        const isMnemonic = wallet.mnemonic.split(" ").length === 12 || wallet.mnemonic.split(" ").length === 24;
-        if (!isMnemonic) {
-          bot.sendMessage(chatId, "Mnemonic tidak valid. Harus 12 atau 24 kata.", {
-            reply_markup: {
-              inline_keyboard: [backToHomeButton],
-            },
-          });
-          return;
-        }
-        if (!wallet.xion_alamat.startsWith(XION_TESTNET.prefix) || wallet.xion_alamat.length !== 43) {
-          bot.sendMessage(chatId, `Alamat Xion tidak valid: ${wallet.xion_alamat}. Harus diawali ${XION_TESTNET.prefix} dan panjang 43 karakter.`, {
-            reply_markup: {
-              inline_keyboard: [backToHomeButton],
-            },
-          });
-          return;
-        }
-        const wallets = await readCosmosWallets().catch(() => []);
-        wallets.push({
-          credential: wallet.mnemonic,
-          xionAddress: wallet.xion_alamat,
-          telegramBotToken: wallet.token_bot || "",
-          telegramChatId: wallet.chat_id || "",
-        });
-        await fs.writeFile(WALLET_FILE, JSON.stringify(wallets, null, 2));
-        bot.sendMessage(chatId, `Wallet Cosmos berhasil ditambahkan!`, {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
-        });
-        delete userState[chatId];
-      } catch (err) {
-        bot.sendMessage(chatId, `Gagal menambah wallet: ${err.message}`, {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
-        });
-      }
-      return;
-    }
+  // Check if chat ID is allowed
+  if (chatId !== allowedChatId) {
+    await bot.sendMessage(chatId, "Access denied.");
+    return;
+  }
 
-    if (state.step === "cosmos_transactions") {
-      const maxTransaction = parseInt(msg.text.trim());
-      if (isNaN(maxTransaction) || maxTransaction <= 0) {
-        bot.sendMessage(chatId, "Masukkan angka positif yang valid.", {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
+  // Ignore commands (messages starting with "/")
+  if (msg.text && msg.text.startsWith("/")) {
+    return;
+  }
+
+  // Check if user state exists
+  if (!userState[chatId]) {
+    await showMainMenu(chatId, "Please use the buttons to interact.");
+    return;
+  }
+
+  const state = userState[chatId];
+
+  // Handle Cosmos wallet input
+  if (state.step === "add_wallet_cosmos_input") {
+    try {
+      const lines = msg.text.split("\n").map((line) => line.trim());
+      const wallet = {};
+      lines.forEach((line) => {
+        const [key, value] = line.split(":").map((s) => s.trim());
+        if (key && value) wallet[key] = value;
+      });
+
+      // Validate wallet input
+      if (!wallet.mnemonic || !wallet.xion_alamat) {
+        await bot.sendMessage(chatId, "Invalid format. Please provide mnemonic and xion_alamat.", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
         });
         return;
       }
+
+      // Validate mnemonic (12 or 24 words)
+      const isMnemonicValid = wallet.mnemonic.split(" ").length === 12 || wallet.mnemonic.split(" ").length === 24;
+      if (!isMnemonicValid) {
+        await bot.sendMessage(chatId, "Invalid mnemonic. Must be 12 or 24 words.", {
+          reply_markup: { inline_keyboard: [backToHomeButton] },
+        });
+        return;
+      }
+
+      // Validate Xion address
+      if (!wallet.xion_alamat.startsWith(XION_TESTNET.prefix) || wallet.xion_alamat.length !== 43) {
+        await bot.sendMessage(
+          chatId,
+          `Invalid Xion address: ${wallet.xion_alamat}. Must start with ${XION_TESTNET.prefix} and be 43 characters long.`,
+          { reply_markup: { inline_keyboard: [backToHomeButton] } }
+        );
+        return;
+      }
+
+      // Save new wallet
       const wallets = await readCosmosWallets().catch(() => []);
-      if (wallets.length === 0) {
-        bot.sendMessage(chatId, "Tidak ada wallet Cosmos ditemukan. Tambahkan wallet terlebih dahulu.", {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
-        });
-        delete userState[chatId];
-        return;
-      }
-      bot.sendMessage(chatId, `Memulai ${maxTransaction} transaksi Cosmos (mode ${state.mode})...`, {
-        reply_markup: {
-          inline_keyboard: [backToHomeButton],
-        },
+      wallets.push({
+        credential: wallet.mnemonic,
+        xionAddress: wallet.xion_alamat,
+        telegramBotToken: wallet.token_bot || "",
+        telegramChatId: wallet.chat_id || "",
       });
-      await cosmosMain(state.mode, maxTransaction, bot, chatId);
-      bot.sendMessage(chatId, "Proses transaksi Cosmos selesai.", {
-        reply_markup: {
-          inline_keyboard: [backToHomeButton],
-        },
+      await fs.writeFile(WALLET_FILE, JSON.stringify(wallets, null, 2));
+      await bot.sendMessage(chatId, "Cosmos wallet added successfully!", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
+      });
+      delete userState[chatId];
+    } catch (err) {
+      await bot.sendMessage(chatId, `Failed to add wallet: ${err.message}`, {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
+      });
+    }
+    return;
+  }
+
+  // Handle Cosmos transactions
+  if (state.step === "cosmos_transactions") {
+    const maxTransaction = parseInt(msg.text.trim());
+    if (isNaN(maxTransaction) || maxTransaction <= 0) {
+      await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
+      });
+      return;
+    }
+
+    const wallets = await readCosmosWallets().catch(() => []);
+    if (wallets.length === 0) {
+      await bot.sendMessage(chatId, "No Cosmos wallets found. Please add a wallet first.", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
       });
       delete userState[chatId];
       return;
     }
 
-    if (state.step === "evm_transactions") {
-      const maxTransaction = parseInt(msg.text.trim());
-      if (isNaN(maxTransaction) || maxTransaction <= 0) {
-        bot.sendMessage(chatId, "Masukkan angka positif yang valid.", {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
-        });
-        return;
-      }
-      const wallets = loadEvmWallets();
-      if (wallets.length === 0) {
-        bot.sendMessage(chatId, "Tidak ada wallet EVM ditemukan di .env. Tambahkan PRIVATE_KEY_...", {
-          reply_markup: {
-            inline_keyboard: [backToHomeButton],
-          },
-        });
-        delete userState[chatId];
-        return;
-      }
-      bot.sendMessage(chatId, `Memulai ${maxTransaction} transaksi EVM ke ${state.destination}...`, {
-        reply_markup: {
-          inline_keyboard: [backToHomeButton],
-        },
+    await bot.sendMessage(chatId, `Starting ${maxTransaction} Cosmos transactions (mode ${state.mode})...`, {
+      reply_markup: { inline_keyboard: [backToHomeButton] },
+    });
+    await cosmosMain(state.mode, maxTransaction, bot, chatId);
+    await bot.sendMessage(chatId, "Cosmos transaction process completed.", {
+      reply_markup: { inline_keyboard: [backToHomeButton] },
+    });
+    delete userState[chatId];
+    return;
+  }
+
+  // Handle EVM transactions
+  if (state.step === "evm_transactions") {
+    const maxTransaction = parseInt(msg.text.trim());
+    if (isNaN(maxTransaction) || maxTransaction <= 0) {
+      await bot.sendMessage(chatId, "Please enter a valid positive number.", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
       });
-      for (const walletInfo of wallets) {
-        if (state.destination === "holesky") {
-          await sendEvmTransaction(walletInfo, maxTransaction, "holesky", bot, chatId);
-        } else if (state.destination === "babylon") {
-          await sendEvmTransaction(walletInfo, maxTransaction, "babylon", bot, chatId);
-        } else if (state.destination === "random") {
-          const destinations = ["holesky", "babylon"].filter(dest => dest !== "babylon" || walletInfo.babylonAddress);
-          if (destinations.length === 0) {
-            bot.sendMessage(chatId, `Melewati wallet '${walletInfo.name}': Tidak ada tujuan valid (alamat Babylon tidak ada).`, {
-              reply_markup: {
-                inline_keyboard: [backToHomeButton],
-              },
-            });
-            continue;
-          }
-          for (let i = 0; i < maxTransaction; i++) {
-            const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
-            await sendEvmTransaction(walletInfo, 1, randomDest, bot, chatId);
-          }
-        }
-      }
-      bot.sendMessage(chatId, "Proses transaksi EVM selesai.", {
-        reply_markup: {
-          inline_keyboard: [backToHomeButton],
-        },
+      return;
+    }
+
+    const wallets = loadEvmWallets();
+    if (wallets.length === 0) {
+      await bot.sendMessage(chatId, "No EVM wallets found in .env. Please add PRIVATE_KEY_...", {
+        reply_markup: { inline_keyboard: [backToHomeButton] },
       });
       delete userState[chatId];
+      return;
     }
-  });
 
-  logger.info("Bot Telegram berhasil dimulai.");
-}
+    await bot.sendMessage(chatId, `Starting ${maxTransaction} EVM transactions to ${state.destination}...`, {
+      reply_markup: { inline_keyboard: [backToHomeButton] },
+    });
 
-// Fungsi utama
+    for (const walletInfo of wallets) {
+      if (state.destination === "holesky") {
+        await sendEvmTransaction(walletInfo, maxTransaction, "holesky", bot, chatId);
+      } else if (state.destination === "babylon") {
+        await sendEvmTransaction(walletInfo, maxTransaction, "babylon", bot, chatId);
+      } else if (state.destination === "random") {
+        const destinations = ["holesky", "babylon"].filter((dest) => dest !== "babylon" || walletInfo.babylonAddress);
+        if (destinations.length === 0) {
+          await bot.sendMessage(chatId, `Skipping wallet '${walletInfo.name}': No valid destinations (Babylon address missing).`, {
+            reply_markup: { inline_keyboard: [backToHomeButton] },
+          });
+          continue;
+        }
+        for (let i = 0; i < maxTransaction; i++) {
+          const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
+          await sendEvmTransaction(walletInfo, 1, randomDest, bot, chatId);
+        }
+      }
+    }
+
+    await bot.sendMessage(chatId, "EVM transaction process completed.", {
+      reply_markup: { inline_keyboard: [backToHomeButton] },
+    });
+    delete userState[chatId];
+    return;
+  }
+});
+
+// Log bot startup
+logger.info("Telegram bot started successfully.");
+
+// Main function
 async function main() {
   try {
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
-      mainTelegram();
+      await mainTelegram();
     } else {
-      mainConsole();
+      await mainConsole();
     }
   } catch (err) {
-    logger.error(`Kesalahan utama: ${err.message}`);
+    logger.error(`Main error: ${err.message}`);
     process.exit(1);
   }
 }
 
+// Run main function
 main();
