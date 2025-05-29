@@ -114,19 +114,19 @@ synchronize service
 
 ### Copy the service file to the systemd directory
 ```bash
-sudo cp ~/.synchronizer/synchronizer.service /etc/systemd/system/
+sudo cp ~/.synqchronizer/synqchronizer.service /etc/systemd/system/
 ```
 
 ### Reload systemd and enable the service
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable synchronizer
-sudo systemctl start synchronizer
+sudo systemctl enable synqchronizer.service
+sudo systemctl start synqchronizer.service
 ```
 
 ### Verify service status
 ```bash
-sudo systemctl status synchronizer
+sudo systemctl status synqchronizer.service
 ```
 
 ---
@@ -158,7 +158,7 @@ http://<YOUR_VPS_IP>:3000
   ```
 - View service logs:
   ```bash
-  sudo journalctl -u synchronizer -f
+  sudo journalctl -u synqchronizer.service -f
   ```
 
 ---
