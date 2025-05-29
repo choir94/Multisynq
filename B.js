@@ -484,7 +484,7 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
     return;
   }
   const contract = new ethers.Contract(EVM_CONTRACT_ADDRESS, UCS03_ABI, wallet);
-  const senderHex = wallet.address.slice(2).toLowerCase(); // Alamat EVM tanpa 0x (40 chars)
+  const senderHex = wallet.address.slice(2).toLowerCase();
   const recipientHex = destination === "babylon" ? encodeBech32ToHex(recipientAddress) : senderHex;
 
   // Validasi panjang hex
@@ -500,7 +500,7 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
   logger.info(`Sender Hex: ${senderHex}`);
   logger.info(`Recipient Hex: ${recipientHex}`);
 
-  // Template operand berdasarkan destination
+  // Template operand
   if (destination === "babylon") {
     operand = `0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000018000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000002710000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000002600000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002a000000000000000000000000000000000000000000000000000000000000027100000000000000000000000000000000000000000000000000000000000000014${senderHex}000000000000000000000000000000000000000000000000000000000000000000000000000000000000002a${recipientHex}0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000141c7d4b196cb0c7b01d743fbc6116a902379c72380000000000000000000000000000000000000000000000000000000000000000000000000000000000000004555344430000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000045553444300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003e${recipientHex}0000`;
   } else {
@@ -510,6 +510,12 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
   // Validasi operand
   if (!operand.startsWith("0x") || !isValidHex(operand.slice(2))) {
     logger.error(`Invalid operand format: ${operand}`);
+    return;
+  }
+  // Validasi panjang operand (sekitar 616 bytes untuk Babylon, 604 bytes untuk Holesky)
+  const expectedLength = destination === "babylon" ? 1232 : 1208; // Hex chars (616*2 or 604*2)
+  if (operand.length !== expectedLength) {
+    logger.error(`Invalid operand length: ${operand.length}, expected ${expectedLength}`);
     return;
   }
 
@@ -524,10 +530,8 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
     const instruction = { version: 0, opcode: "0x02", operand };
 
     try {
-      // Estimasi gas untuk debugging
       const gasEstimate = await contract.send.estimateGas(channelId, 0, timeoutTimestamp, salt, instruction);
       logger.info(`Estimated Gas: ${gasEstimate.toString()}`);
-
       const tx = await contract.send(channelId, 0, timeoutTimestamp, salt, instruction, { gasLimit: gasEstimate * 120n / 100n });
       const receipt = await tx.wait(1);
       const successMsg = `${timelog()} | ${walletInfo.name || "No Name"} | Transaction Confirmed: ${BASE_EXPLORER_URL}/tx/${receipt.hash}`;
@@ -539,6 +543,8 @@ async function sendEvmTransaction(walletInfo, maxTransaction, destination, teleg
         const packetMsg = `${timelog()} | ${walletInfo.name || "No Name"} | Packet Sent: ${UNION_URL}/${packetHash}`;
         logger.info(packetMsg);
         if (telegramBot && chatId) telegramBot.sendMessage(chatId, packetMsg);
+      } else {
+        logger.warn(`No packet hash for tx: ${txHash}. Check Union Explorer: ${UNION_URL}/search?query=${txHash}`);
       }
     } catch (err) {
       const errMsg = `Failed for ${wallet.address}: ${err.message}`;
