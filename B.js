@@ -409,7 +409,7 @@ async function checkEvmBalanceAndApprove(wallet, usdcAddress, spenderAddress) {
   return true;
 }
 
-async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
+async function pollPacketHash(txHash, retries = 100, intervalMs = 10000) {
   const headers = {
     accept: "application/graphql-response+json, application/json",
     "content-type": "application/json",
@@ -420,6 +420,7 @@ async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
       query ($submission_tx_hash: String!) {
         v2_transfers(args: {p_transaction_hash: $submission_tx_hash}) {
           packet_hash
+          status
         }
       }
     `,
@@ -430,16 +431,24 @@ async function pollPacketHash(txHash, retries = 50, intervalMs = 5000) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await axios.post(GRAPHQL_ENDPOINT, data, { headers });
-      const result = res.data?.data?.v2_transfers;
-      if (result && result.length > 0 && result[0].packet_hash) {
-        return result[0].packet_hash;
+      logger.info(`Polling attempt ${i + 1}/${retries} for txHash: ${txHash}`);
+      logger.info(`GraphQL response: ${JSON.stringify(res.data, null, 2)}`);
+      const result = res.data?.data?.v2_transfers?.[0];
+      if (result && result.packet_hash) {
+        logger.success(`Packet hash found: ${result.packet_hash}`);
+        return result.packet_hash;
       }
-    } catch (e) {
-      logger.error(`Packet error: ${e.message}`);
+      logger.info(`No packet hash in attempt ${i + 1}, status: ${result?.status || 'unknown'}`);
+    } catch (error) {
+      logger.error(`Polling error: ${error.message}`);
+      if (error.response) {
+        logger.error(`HTTP status: ${error.response.status}, Response: ${JSON.stringify(error.response.data, null, 2)}`);
+      }
     }
     await sleep(intervalMs);
   }
-  logger.warn(`No packet hash found after ${retries} attempts.`);
+  logger.error(`No packet hash found after ${retries} attempts for txHash: ${txHash}`);
+  logger.info(`Check transaction on Union Explorer: ${UNION_URL}/search?query=${txHash}`);
   return null;
 }
 
