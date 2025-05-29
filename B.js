@@ -409,46 +409,53 @@ async function checkEvmBalanceAndApprove(wallet, usdcAddress, spenderAddress) {
   return true;
 }
 
+// Function to poll for packet hash from Union GraphQL endpoint
 async function pollPacketHash(txHash, retries = 100, intervalMs = 10000) {
   const headers = {
-    accept: "application/graphql-response+json, application/json",
-    "content-type": "application/json",
-    "user-agent": "Mozilla/5.0",
+    accept: 'application/graphql-response+json, application/json',
+    'accept-encoding': 'gzip, deflate, br, zstd',
+    'accept-language': 'en-US,en;q=0.9,id;q=0.8',
+    'content-type': 'application/json',
+    origin: 'https://app.union.build',
+    referer: 'https://app.union.build/',
+    'user-agent': 'Mozilla/5.0',
   };
   const data = {
     query: `
       query ($submission_tx_hash: String!) {
         v2_transfers(args: {p_transaction_hash: $submission_tx_hash}) {
           packet_hash
-          status
         }
       }
     `,
     variables: {
-      submission_tx_hash: txHash.startsWith("0x") ? txHash : `0x${txHash}`,
+      submission_tx_hash: txHash.startsWith('0x') ? txHash : `0x${txHash}`,
     },
   };
+
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await axios.post(GRAPHQL_ENDPOINT, data, { headers });
+      const res = await axios.post(graphqlEndpoint, data, { headers });
       logger.info(`Polling attempt ${i + 1}/${retries} for txHash: ${txHash}`);
       logger.info(`GraphQL response: ${JSON.stringify(res.data, null, 2)}`);
-      const result = res.data?.data?.v2_transfers?.[0];
-      if (result && result.packet_hash) {
-        logger.success(`Packet hash found: ${result.packet_hash}`);
-        return result.packet_hash;
+      const result = res.data?.data?.v2_transfers;
+      if (result && result.length > 0 && result[0].packet_hash) {
+        logger.success(`Packet hash found: ${result[0].packet_hash}`);
+        return result[0].packet_hash;
       }
-      logger.info(`No packet hash in attempt ${i + 1}, status: ${result?.status || 'unknown'}`);
+      logger.info(`No packet hash in attempt ${i + 1}`);
+      logger.info(`Check Union Explorer: ${UNION_URL}/search?query=${txHash}`);
     } catch (error) {
       logger.error(`Polling error: ${error.message}`);
       if (error.response) {
         logger.error(`HTTP status: ${error.response.status}, Response: ${JSON.stringify(error.response.data, null, 2)}`);
       }
     }
-    await sleep(intervalMs);
+    await delay(intervalMs); // Use delay as per your script; replace with sleep if undefined
   }
-  logger.error(`No packet hash found after ${retries} attempts for txHash: ${txHash}`);
+  logger.warn(`No packet hash found after ${retries} attempts for txHash: ${txHash}`);
   logger.info(`Check transaction on Union Explorer: ${UNION_URL}/search?query=${txHash}`);
+  logger.info(`Check Babylon address: bbn1anenua2750d9n2ktzh9tvywqg2jh2jz4k2264h on https://babylon-testnet.explorer.polka.chu/`);
   return null;
 }
 
