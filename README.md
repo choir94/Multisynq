@@ -112,28 +112,28 @@ synchronize service
 
 ### Copy the service file to the systemd directory
 ```bash
-sudo cp ~/.synqchronizer/synqchronizer.service /etc/systemd/system/
+sudo cp /root/.synchronizer-cli/synchronizer-cli.service /etc/systemd/system/
 ```
 
 ### Reload systemd and enable the service
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable synqchronizer.service
-sudo systemctl start synqchronizer.service
+sudo systemctl enable synchronizer-cli
+sudo systemctl start synchronizer-cli
 ```
 
 ### Verify service status
 ```bash
-sudo systemctl status synqchronizer.service
+sudo systemctl status synchronizer-cli
 ```
 
 ---
 
 ## 6. Access Web Dashboard
 
-### Open port 3000 in the VPS firewall (if needed)
+### Screeb
 ```bash
-sudo ufw allow 3000/tcp
+screen -S Synchronizer
 ```
 
 ### Run the dashboard (optional)
